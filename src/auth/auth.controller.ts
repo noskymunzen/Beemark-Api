@@ -36,7 +36,7 @@ export class AuthController {
   @UseGuards(JwtGuard)
   @Get('/me')
   me(@Req() req: Request & { user: User }) {
-    return req.user;
+    return this.authService.findUserById(req.user._id);
   }
 
   @Post('/recover')

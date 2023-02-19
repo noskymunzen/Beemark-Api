@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
 import { BookmarkModule } from './bookmark/bookmark.module';
 import { EnvironmentModule } from './environment/environment.module';
+import { ProfileModule } from './profile/profile.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { EnvironmentModule } from './environment/environment.module';
     }),
     BookmarkModule,
     AuthModule,
+    ProfileModule,
   ],
   controllers: [],
   providers: [],

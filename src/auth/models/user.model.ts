@@ -6,7 +6,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { Types } from 'mongoose';
+import { Document, Types } from 'mongoose';
 import { IsPassword } from '../decorators/is-password.decorator';
 
 @Schema({ timestamps: {} })
@@ -36,3 +36,4 @@ export default class User {
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
+export type UserDocument = User & Document;

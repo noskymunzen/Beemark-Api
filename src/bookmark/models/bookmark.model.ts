@@ -6,7 +6,7 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
-  IsUrl
+  IsUrl,
 } from 'class-validator';
 import { Document, Types } from 'mongoose';
 
@@ -56,7 +56,7 @@ export default class Bookmark {
   @Prop()
   @IsArray()
   @IsString({ each: true })
-  @IsNotEmpty()
+  @IsNotEmpty({ each: true })
   tags: string[];
 }
 

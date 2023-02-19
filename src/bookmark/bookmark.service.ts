@@ -5,6 +5,7 @@ import { URLExtractorService } from 'src/url-extractor/url-extractor.service';
 import CreateBookmarkDTO from './dtos/create-bookmark.dto';
 import FindBookmarkAllDTO from './dtos/find-bookmark-all.dto';
 import UpdateBookmarkDTO from './dtos/update-bookmark.dto';
+import { AuthError } from './enums/errors.enum';
 import Bookmark, { BookmarkDocument } from './models/bookmark.model';
 
 @Injectable()
@@ -74,7 +75,16 @@ export class BookmarkService {
   ): Promise<BookmarkDocument> {
     const bookmark = await this.findBookmarkById(id, idUser);
     if (!bookmark) {
-      throw new NotFoundException('Bookmark not found.');
+      throw new NotFoundException({
+        type: AuthError.BookmarkNotFound,
+        message: 'Bookmark not found.',
+      });
+    }
+    if (bookmark.isDeleted) {
+      throw new NotFoundException({
+        type: AuthError.BookmarkNotFound,
+        message: 'Bookmark not found.',
+      });
     }
     bookmark.$set(updateBookmarkDTO);
     return bookmark.save();
@@ -86,10 +96,16 @@ export class BookmarkService {
   ): Promise<BookmarkDocument> {
     const bookmark = await this.findBookmarkById(id, idUser);
     if (!bookmark) {
-      throw new NotFoundException('Bookmark not found.');
+      throw new NotFoundException({
+        type: AuthError.BookmarkNotFound,
+        message: 'Bookmark not found.',
+      });
     }
     if (bookmark.isDeleted) {
-      throw new NotFoundException('Bookmark was already deleted.');
+      throw new NotFoundException({
+        type: AuthError.BookmarkNotFound,
+        message: 'Bookmark not found.',
+      });
     }
     bookmark.isDeleted = true;
     return bookmark.save();

@@ -9,6 +9,7 @@ import LoginDTO from './dtos/login.dto';
 import RecoverPasswordDTO from './dtos/recover-password.dto';
 import ResetPasswordDTO from './dtos/reset-password.dto';
 import SignupDTO from './dtos/signup.dto';
+import { AuthError } from './enums/errors.enum';
 import PasswordToken, {
   PasswordTokenDocument,
 } from './models/password-token.model';
@@ -30,7 +31,10 @@ export class AuthService {
   ): Promise<PasswordToken> {
     const user = await this.findUserByEmail(recoverPasswordDTO.email);
     if (!user) {
-      throw new NotFoundException(`${recoverPasswordDTO.email} not found.`);
+      throw new NotFoundException({
+        type: AuthError.EmailNotExist,
+        message: `${recoverPasswordDTO.email} not found.`,
+      });
     }
     const passwordToken = new this.passwordTokenModel({
       idUser: user._id,
@@ -46,20 +50,23 @@ export class AuthService {
         to: user.email,
         from: process.env.MAIL_SMTP_DEFAULT_FROM,
         subject: 'Beemark Password recovery',
-        html: `<b>Open this <a href="${emailLink}">link</a> to change your password </b>`,
+        html: `Open this <a href="${emailLink}">link</a> to change your password`,
       })
       .catch(() => {});
     return passwordToken;
   }
 
   private createAppURL(link: string) {
-    return `${process.env.APP_URI}/${link}`;
+    return `${process.env.APP_URI}${link}`;
   }
 
   async signup(signupDTO: SignupDTO): Promise<User> {
     const user = await this.findUserByEmail(signupDTO.email);
     if (user) {
-      throw new NotFoundException(`${signupDTO.email} already exists.`);
+      throw new NotFoundException({
+        type: AuthError.EmailExists,
+        message: `${signupDTO.email} already exists.`,
+      });
     }
     const signupUser = new this.userModel({
       _id: new Types.ObjectId(),
@@ -73,14 +80,20 @@ export class AuthService {
   async login(loginDTO: LoginDTO): Promise<{ token: string }> {
     const user = await this.findUserByEmail(loginDTO.email);
     if (!user) {
-      throw new NotFoundException(`Credentials doesn't match.`);
+      throw new NotFoundException({
+        type: AuthError.CredentialsUnmatch,
+        message: `Credentials doesn't match.`,
+      });
     }
     const passwordsMatch = await this.comparePassword(
       loginDTO.password,
       user.password,
     );
     if (!passwordsMatch) {
-      throw new NotFoundException(`Credentials doesn't match.`);
+      throw new NotFoundException({
+        type: AuthError.CredentialsUnmatch,
+        message: `Credentials doesn't match.`,
+      });
     }
     return { token: this.generateToken(user) };
   }
@@ -101,18 +114,21 @@ export class AuthService {
       resetPasswordDTO.code,
     );
     if (!passwordToken) {
-      throw new NotFoundException('Password token not found.');
+      throw new NotFoundException({
+        type: AuthError.NotFound,
+        message: 'Password token not found.',
+      });
     }
     const isValid = this.validatePasswordToken(passwordToken);
     if (!isValid) {
-      throw new NotFoundException('Password token expired or used');
+      throw new NotFoundException({
+        type: AuthError.NotFound,
+        message: 'Password token expired or used',
+      });
     }
     const user = await this.userModel
       .findOne({ _id: new Types.ObjectId(passwordToken.idUser) })
       .exec();
-    if (!user) {
-      throw new NotFoundException('User not found.');
-    }
     user.password = await this.hashPassword(resetPasswordDTO.password);
 
     passwordToken.usedAt = new Date();
@@ -135,6 +151,15 @@ export class AuthService {
     return this.passwordTokenModel
       .findOne({
         code,
+      })
+      .exec();
+  }
+
+  async findUserById(id: Types.ObjectId): Promise<User | null> {
+    console.log(id);
+    return this.userModel
+      .findOne({
+        _id: new Types.ObjectId(id),
       })
       .exec();
   }
