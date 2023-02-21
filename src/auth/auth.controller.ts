@@ -8,7 +8,6 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { Request } from 'express';
 import { AuthService } from './auth.service';
 import GetPasswordToken from './dtos/get-password-token.dto';
 import LoginDTO from './dtos/login.dto';
@@ -18,6 +17,7 @@ import SignupDTO from './dtos/signup.dto';
 import { JwtGuard } from './guards/jwt.guard';
 import PasswordToken from './models/password-token.model';
 import User from './models/user.model';
+import { RequestWithUser } from './types';
 
 @Controller('/auth')
 export class AuthController {
@@ -35,7 +35,7 @@ export class AuthController {
 
   @UseGuards(JwtGuard)
   @Get('/me')
-  me(@Req() req: Request & { user: User }) {
+  me(@Req() req: RequestWithUser) {
     return this.authService.findUserById(req.user._id);
   }
 

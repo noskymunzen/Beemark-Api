@@ -15,8 +15,5 @@ declare namespace NodeJS {
     MAIL_SMTP_PASSWORD: string;
     MAIL_SMTP_HOST: string;
     MAIL_SMTP_DEFAULT_FROM: string;
-
-    TELEGRAM_TOKEN?: string;
-    TELEGRAM_GROUP?: string;
   }
 }

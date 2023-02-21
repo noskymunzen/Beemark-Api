@@ -17,7 +17,7 @@ import { ProfileModule } from './profile/profile.module';
     MailerModule.forRoot({
       transport: `smtp://${process.env.MAIL_SMTP_EMAIL}:${process.env.MAIL_SMTP_PASSWORD}@${process.env.MAIL_SMTP_HOST}`,
       defaults: {
-        from: `<${process.env.MAIL_SMTP_DEFAULT_FROM}>`,
+        from: `<${process.env.MAIL_SMTP_EMAIL}>`,
       },
     }),
     BookmarkModule,

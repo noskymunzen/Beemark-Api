@@ -1,3 +1,4 @@
-export enum AuthError {
+// TODO: fix enum name
+export enum BookmarkError {
   BookmarkNotFound = 'BookmarkNotFound',
 }
