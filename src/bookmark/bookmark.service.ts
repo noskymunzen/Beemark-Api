@@ -52,7 +52,7 @@ export class BookmarkService {
   ): Promise<BookmarkDocument[]> {
     const query: FilterQuery<BookmarkDocument> = {
       idUser,
-      isDelete: false,
+      isDeleted: false,
     };
     if (findBookmarkAllDTO.search) {
       query.$or = [
