@@ -1,20 +1,24 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import * as bcrypt from 'bcrypt';
 import { Model, Types } from 'mongoose';
 import User, { UserDocument } from 'src/auth/models/user.model';
-import UpdateProfileDTO from './dto/update-profile.dto';
-import { ChangePassError } from './enums/errors.enum';
+import { comparePassword, hashPassword } from 'src/helpers/encrypt.helpers';
+import UpdateProfileDTO from './dtos/update-profile.dto';
+import { ProfileError } from './enums/errors.enum';
 
 @Injectable()
 export class ProfileService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
+  /**
+   * Updates user's data
+   * @param idUser
+   * @param updateProfileDTO
+   */
   async updateProfile(
     idUser: Types.ObjectId,
     updateProfileDTO: UpdateProfileDTO,
   ): Promise<User> {
-    console.log(idUser);
     const user = await this.findUserById(idUser);
     if (!user) {
       throw new NotFoundException({
@@ -22,17 +26,17 @@ export class ProfileService {
       });
     }
     if (updateProfileDTO.passwords) {
-      const passwordsMatch = await this.comparePassword(
+      const passwordsMatch = await comparePassword(
         updateProfileDTO.passwords.currentPassword,
         user.password,
       );
       if (!passwordsMatch) {
         throw new NotFoundException({
-          type: ChangePassError.CurrentPassIsNotValid,
+          type: ProfileError.CurrentPassIsNotValid,
           message: `Current password is not valid.`,
         });
       }
-      user.password = await this.hashPassword(
+      user.password = await hashPassword(
         updateProfileDTO.passwords.newPassword,
       );
     }
@@ -43,21 +47,15 @@ export class ProfileService {
     return user;
   }
 
+  /**
+   * Finds user by id
+   * @param id
+   */
   async findUserById(id: Types.ObjectId): Promise<UserDocument | null> {
     return this.userModel
       .findOne({
         _id: new Types.ObjectId(id),
       })
       .exec();
-  }
-  async comparePassword(
-    plainPassword: string,
-    hashedPassword: string,
-  ): Promise<boolean> {
-    return bcrypt.compare(plainPassword, hashedPassword);
-  }
-
-  async hashPassword(plainPassword: string): Promise<string> {
-    return bcrypt.hash(plainPassword, 10);
   }
 }

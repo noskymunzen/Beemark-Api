@@ -1,11 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import {
-  IsEmail,
-  IsMongoId,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-} from 'class-validator';
+import { IsEmail, IsMongoId, IsNotEmpty, IsString } from 'class-validator';
 import { Document, Types } from 'mongoose';
 import { IsPassword } from '../decorators/is-password.decorator';
 
@@ -15,24 +9,19 @@ export default class User {
   @IsMongoId()
   _id: Types.ObjectId;
 
-  @Prop({})
+  @Prop({ type: String, required: true })
   @IsString()
   @IsNotEmpty()
   name: string;
 
-  @Prop()
+  @Prop({ type: String, required: true })
   @IsPassword()
   password: string;
-
-  @Prop()
+  @Prop({ type: String, required: true })
   @IsString()
   @IsNotEmpty()
   @IsEmail()
   email: string;
-
-  @Prop()
-  @IsOptional()
-  picture?: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

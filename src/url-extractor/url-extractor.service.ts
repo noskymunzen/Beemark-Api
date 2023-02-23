@@ -13,9 +13,11 @@ const scraper = metascraper([
 export class URLExtractorService {
   constructor(private readonly httpService: HttpService) {}
 
-  async extract(
-    url: string,
-  ): Promise<{
+  /**
+   * Extract data of the url
+   * @param url
+   */
+  async extract(url: string): Promise<{
     description: string;
     title: string;
     logo: string;
@@ -25,11 +27,10 @@ export class URLExtractorService {
       responseType: 'document',
     });
     if (response.status !== 200) {
-      throw new Error('rip');
+      throw new Error('Something has gone wrong');
     }
 
     const metadata = await scraper({ html: response.data, url });
-    console.log({ metadata });
     return metadata;
   }
 }

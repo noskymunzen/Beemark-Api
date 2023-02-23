@@ -2,9 +2,9 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
-import * as bcrypt from 'bcrypt';
 import { addMinutes } from 'date-fns';
 import { Model, Types } from 'mongoose';
+import { comparePassword, hashPassword } from 'src/helpers/encrypt.helpers';
 import LoginDTO from './dtos/login.dto';
 import RecoverPasswordDTO from './dtos/recover-password.dto';
 import ResetPasswordDTO from './dtos/reset-password.dto';
@@ -26,6 +26,10 @@ export class AuthService {
     private mailerService: MailerService,
   ) {}
 
+  /**
+   * Creates password token and sends it via email to user based on email
+   * @param recoverPasswordDTO request context body
+   */
   async recoverPassword(
     recoverPasswordDTO: RecoverPasswordDTO,
   ): Promise<PasswordToken> {
@@ -56,10 +60,18 @@ export class AuthService {
     return passwordToken;
   }
 
+  /**
+   * Creates a link based on app uri environment variable
+   * @param link
+   */
   private createAppURL(link: string) {
     return `${process.env.APP_URI}${link}`;
   }
 
+  /**
+   * Allows user to register an account
+   * @param signupDTO request context body
+   */
   async signup(signupDTO: SignupDTO): Promise<User> {
     const user = await this.findUserByEmail(signupDTO.email);
     if (user) {
@@ -72,11 +84,15 @@ export class AuthService {
       _id: new Types.ObjectId(),
       email: signupDTO.email,
       name: signupDTO.name,
-      password: await this.hashPassword(signupDTO.password),
+      password: await hashPassword(signupDTO.password),
     });
     return signupUser.save();
   }
 
+  /**
+   * Validates user credentials and generates jwt
+   * @param loginDTO request context body
+   */
   async login(loginDTO: LoginDTO): Promise<{ token: string }> {
     const user = await this.findUserByEmail(loginDTO.email);
     if (!user) {
@@ -85,7 +101,7 @@ export class AuthService {
         message: `Credentials doesn't match.`,
       });
     }
-    const passwordsMatch = await this.comparePassword(
+    const passwordsMatch = await comparePassword(
       loginDTO.password,
       user.password,
     );
@@ -98,17 +114,29 @@ export class AuthService {
     return { token: this.generateToken(user) };
   }
 
+  /**
+   * Generates jwt based on user data
+   * @param user
+   */
   generateToken(user: User) {
     return this.jwtService.sign({
       user,
     });
   }
 
+  /**
+   * Validates if password token is valid
+   * @param passwordToken
+   */
   validatePasswordToken(passwordToken: PasswordToken): boolean {
     const isExpired = passwordToken.expireAt.getTime() < new Date().getTime();
     return !isExpired && !passwordToken.usedAt;
   }
 
+  /**
+   * Resets password for account recovery
+   * @param resetPasswordDTO request context body
+   */
   async resetPassword(resetPasswordDTO: ResetPasswordDTO): Promise<void> {
     const passwordToken = await this.findPasswordTokenByCode(
       resetPasswordDTO.code,
@@ -129,7 +157,7 @@ export class AuthService {
     const user = await this.userModel
       .findOne({ _id: new Types.ObjectId(passwordToken.idUser) })
       .exec();
-    user.password = await this.hashPassword(resetPasswordDTO.password);
+    user.password = await hashPassword(resetPasswordDTO.password);
 
     passwordToken.usedAt = new Date();
 
@@ -145,6 +173,10 @@ export class AuthService {
     await Promise.all([user.save(), passwordToken.save()]);
   }
 
+  /**
+   * Finds password token based on code
+   * @param code
+   */
   async findPasswordTokenByCode(
     code: string,
   ): Promise<PasswordTokenDocument | null> {
@@ -155,8 +187,11 @@ export class AuthService {
       .exec();
   }
 
+  /**
+   * Finds user by id
+   * @param id
+   */
   async findUserById(id: Types.ObjectId): Promise<User | null> {
-    console.log(id);
     return this.userModel
       .findOne({
         _id: new Types.ObjectId(id),
@@ -164,22 +199,15 @@ export class AuthService {
       .exec();
   }
 
+  /**
+   * Finds user by email
+   * @param email
+   */
   async findUserByEmail(email: string): Promise<User | null> {
     return this.userModel
       .findOne({
         email,
       })
       .exec();
-  }
-
-  async hashPassword(plainPassword: string): Promise<string> {
-    return bcrypt.hash(plainPassword, 10);
-  }
-
-  async comparePassword(
-    plainPassword: string,
-    hashedPassword: string,
-  ): Promise<boolean> {
-    return bcrypt.compare(plainPassword, hashedPassword);
   }
 }

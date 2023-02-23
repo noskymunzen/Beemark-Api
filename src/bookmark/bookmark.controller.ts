@@ -61,6 +61,6 @@ export class BookmarkController {
     @Req() req: RequestWithUser,
     @Param() params: IdBookmarkDTO,
   ): Promise<Bookmark> {
-    return this.bookmarkService.deleteModel(params.id, req.user._id);
+    return this.bookmarkService.delete(params.id, req.user._id);
   }
 }

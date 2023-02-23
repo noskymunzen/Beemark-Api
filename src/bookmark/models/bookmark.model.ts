@@ -16,44 +16,44 @@ export default class Bookmark {
   @IsMongoId()
   _id: Types.ObjectId;
 
-  @Prop()
+  @Prop({ type: String, required: true })
   @IsMongoId()
   @IsNotEmpty()
   idUser: string;
 
-  @Prop({})
+  @Prop({ type: String, requeried: true })
   @IsString()
   @IsNotEmpty()
   @IsUrl()
   url: string;
 
-  @Prop({})
+  @Prop({ type: String, requeried: false })
   @IsString()
   @IsOptional()
   title?: string;
 
-  @Prop({})
+  @Prop({ type: String, requeried: false })
   @IsString()
   @IsOptional()
   excerpt?: string;
 
-  @Prop()
+  @Prop({ type: String, requeried: false })
   @IsString()
   @IsOptional()
   @IsUrl()
   imageURL?: string;
 
-  @Prop({ default: true })
+  @Prop({ type: Boolean, default: true })
   @IsBoolean()
   @IsOptional()
   isAvailable?: boolean;
 
-  @Prop({ default: false })
+  @Prop({ type: Boolean, default: false })
   @IsBoolean()
   @IsOptional()
   isDeleted: boolean;
 
-  @Prop()
+  @Prop({ type: [String], required: false })
   @IsArray()
   @IsString({ each: true })
   @IsNotEmpty({ each: true })
