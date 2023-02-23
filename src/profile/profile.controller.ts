@@ -2,7 +2,7 @@ import { Body, Controller, Put, Req, UseGuards } from '@nestjs/common';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import User from 'src/auth/models/user.model';
 import { RequestWithUser } from 'src/auth/types';
-import UpdateProfileDTO from './dto/update-profile.dto';
+import UpdateProfileDTO from './dtos/update-profile.dto';
 import { ProfileService } from './profile.service';
 
 @Controller('/profile')
