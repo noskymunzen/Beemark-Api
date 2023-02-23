@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsPort } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsPort } from 'class-validator';
 
 export class EnvironmentDTO {
   @IsNotEmpty()
@@ -29,15 +29,4 @@ export class EnvironmentDTO {
 
   @IsNotEmpty()
   MAIL_SMTP_HOST: string;
-
-  @IsNotEmpty()
-  MAIL_SMTP_DEFAULT_FROM: string;
-
-  @IsOptional()
-  @IsNotEmpty()
-  TELEGRAM_TOKEN?: string;
-
-  @IsOptional()
-  @IsNotEmpty()
-  TELEGRAM_GROUP?: string;
 }
