@@ -14,6 +14,5 @@ declare namespace NodeJS {
     MAIL_SMTP_EMAIL: string;
     MAIL_SMTP_PASSWORD: string;
     MAIL_SMTP_HOST: string;
-    MAIL_SMTP_DEFAULT_FROM: string;
   }
 }
