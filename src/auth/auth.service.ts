@@ -1,10 +1,10 @@
-import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import { addMinutes } from 'date-fns';
 import { Model, Types } from 'mongoose';
 import { comparePassword, hashPassword } from 'src/helpers/encrypt.helpers';
+import { MailService } from 'src/mail/mail.service';
 import LoginDTO from './dtos/login.dto';
 import RecoverPasswordDTO from './dtos/recover-password.dto';
 import ResetPasswordDTO from './dtos/reset-password.dto';
@@ -23,7 +23,7 @@ export class AuthService {
     @InjectModel(User.name)
     private userModel: Model<User>,
     private jwtService: JwtService,
-    private mailerService: MailerService,
+    private mailService: MailService,
   ) {}
 
   /**
@@ -49,13 +49,8 @@ export class AuthService {
     const saved = await passwordToken.save();
 
     const emailLink = this.createAppURL(`/auth/resetpass?code=${saved.code}`);
-    void this.mailerService
-      .sendMail({
-        to: user.email,
-        from: process.env.MAIL_SMTP_DEFAULT_FROM,
-        subject: 'Beemark Password recovery',
-        html: `Open this <a href="${emailLink}">link</a> to change your password`,
-      })
+    void this.mailService
+      .sendPasswordRecoveryLink(user.email, emailLink)
       .catch(() => {});
     return passwordToken;
   }
@@ -161,14 +156,7 @@ export class AuthService {
 
     passwordToken.usedAt = new Date();
 
-    void this.mailerService
-      .sendMail({
-        to: user.email,
-        from: process.env.MAIL_SMTP_DEFAULT_FROM,
-        subject: 'Beemark Password Change',
-        html: `<b>Your password has changed</b>`,
-      })
-      .catch(() => {});
+    void this.mailService.sendPasswordChangeConfirm(user.email).catch(() => {});
 
     await Promise.all([user.save(), passwordToken.save()]);
   }
