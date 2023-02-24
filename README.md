@@ -23,8 +23,6 @@ Made using:
 
 ## 🔌 Endpoints
 
-Base url: https://beemark.nosky.xyz
-
 ### 🗝️ Authentication
 
 | Method | Uri                  | Description                                     |
