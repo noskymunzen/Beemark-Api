@@ -22,7 +22,7 @@ Made using:
 - [ ] Email verification
 - [ ] Email brand template
 - [ ] Avatar support
-- [ ] Suagger integration
+- [ ] Swagger integration
 
 ## 🔌 Endpoints
 
